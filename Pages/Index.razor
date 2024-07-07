@@ -1,0 +1,48 @@
+﻿@page "/"
+@using MovieStreamingApp.Models
+@inject MovieStreamingApp.Services.MovieService MovieService
+
+<h3>Danh sách phim</h3>
+
+<div>
+    <input @bind="searchTerm" placeholder="Tìm kiếm phim..." />
+    <button @onclick="Search">Tìm kiếm</button>
+</div>
+
+<div class="movie-list">
+    @foreach (var movie in movies)
+    {
+        <div class="movie-item">
+            <img src="@movie.ImageUrl" alt="@movie.Title" style="width: 200px; height: 300px;" />
+            <h4>@movie.Title</h4>
+            <p>@movie.Description</p>
+            <a href="@($"/moviedetails/{movie.Id}")">Xem ngay</a>
+        </div>
+    }
+</div>
+
+<style>
+    .movie-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .movie-item {
+        margin: 10px;
+    }
+</style>
+
+@code {
+    private string searchTerm;
+    private List<Movie> movies;
+
+    protected override void OnInitialized()
+    {
+        movies = MovieService.GetMovies();
+    }
+
+    private void Search()
+    {
+        movies = MovieService.SearchMovies(searchTerm);
+    }
+}

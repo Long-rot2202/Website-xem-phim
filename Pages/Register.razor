@@ -1,0 +1,40 @@
+﻿@page "/register"
+@using MovieStreamingApp.Models
+@inject MovieStreamingApp.Services.UserService UserService
+@inject NavigationManager Navigation
+
+<h3>Đăng ký</h3>
+
+<EditForm Model="@user" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Tên đăng nhập:</label>
+        <InputText @bind-Value="user.Username" />
+    </div>
+    <div>
+        <label>Mật khẩu:</label>
+        <InputText @bind-Value="user.Password" type="password" />
+    </div>
+    <button type="submit">Đăng ký</button>
+</EditForm>
+
+<p>@errorMessage</p>
+
+@code {
+    private User user = new User();
+    private string errorMessage;
+
+    private void HandleRegister()
+    {
+        if (UserService.RegisterUser(user))
+        {
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {
+            errorMessage = "Tên đăng nhập đã tồn tại.";
+        }
+    }
+}

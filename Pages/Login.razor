@@ -1,0 +1,40 @@
+﻿@page "/login"
+@using MovieStreamingApp.Models
+@inject MovieStreamingApp.Services.UserService UserService
+@inject NavigationManager Navigation
+
+<h3>Đăng nhập</h3>
+
+<EditForm Model="@user" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Tên đăng nhập:</label>
+        <InputText @bind-Value="user.Username" />
+    </div>
+    <div>
+        <label>Mật khẩu:</label>
+        <InputText @bind-Value="user.Password" type="password" />
+    </div>
+    <button type="submit">Đăng nhập</button>
+</EditForm>
+
+<p>@errorMessage</p>
+
+@code {
+    private User user = new User();
+    private string errorMessage;
+
+    private void HandleLogin()
+    {
+        if (UserService.ValidateUser(user.Username, user.Password))
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = "Tên đăng nhập hoặc mật khẩu không hợp lệ.";
+        }
+    }
+}

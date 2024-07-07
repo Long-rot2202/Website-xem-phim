@@ -1,0 +1,102 @@
+﻿@page "/moviedetails/{id:int}"
+@using MovieStreamingApp.Models
+@inject MovieStreamingApp.Services.MovieService MovieService
+@inject MovieStreamingApp.Services.ReviewService ReviewService
+@inject NavigationManager NavigationManager
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Movie movie;
+    private List<Review> reviews;
+    private Review newReview = new Review();
+    private string errorMessage;
+
+    protected override void OnInitialized()
+    {
+        movie = MovieService.GetMovieById(Id);
+        reviews = ReviewService.GetReviewsByMovieId(Id);
+    }
+
+    private void SubmitReview()
+    {
+        if (newReview.Rating < 1 || newReview.Rating > 5)
+        {
+            errorMessage = "Đánh giá phải từ 1 đến 5 sao.";
+            return;
+        }
+
+        newReview.MovieId = movie.Id;
+        newReview.Username = "User"; // Thay thế bằng tên người dùng thực sự nếu có hệ thống đăng nhập
+        ReviewService.AddReview(newReview);
+        reviews = ReviewService.GetReviewsByMovieId(movie.Id);
+        newReview = new Review();
+        errorMessage = null;
+    }
+}
+
+@if (movie != null)
+{
+    <div>
+        <h3>@movie.Title</h3>
+        <img src="@movie.ImageUrl" alt="@movie.Title" style="width: 200px; height: 300px;" />
+        <p>@movie.Description</p>
+
+        <!-- Chèn mã quảng cáo -->
+        <div class="ad-container">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9540974970256052"
+                    crossorigin="anonymous"></script>
+            <!-- cà phê kind cup -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9540974970256052"
+                 data-ad-slot="2076389339"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+
+        <video controls width="600">
+            <source src="@movie.VideoUrl" type="video/mp4">
+            Trình duyệt của bạn không hỗ trợ thẻ video.
+        </video>
+    </div>
+
+    <div>
+        <h4>Đánh giá và Bình luận</h4>
+
+        @foreach (var review in reviews)
+        {
+            <div>
+                <p><strong>@review.Username</strong> (@review.DatePosted.ToString("g")):</p>
+                <p>Đánh giá: @review.Rating/5</p>
+                <p>@review.Comment</p>
+                <hr />
+            </div>
+        }
+
+        <EditForm Model="@newReview" OnValidSubmit="SubmitReview">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label>Đánh giá (1-5):</label>
+                <InputNumber @bind-Value="newReview.Rating" min="1" max="5" />
+            </div>
+            <div>
+                <label>Bình luận:</label>
+                <InputTextArea @bind-Value="newReview.Comment" />
+            </div>
+            <button type="submit">Gửi</button>
+        </EditForm>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p style="color: red;">@errorMessage</p>
+        }
+    </div>
+}
+else
+{
+    <p>Không tìm thấy phim.</p>
+}
